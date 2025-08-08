@@ -9,10 +9,9 @@ services:
     volumes:
       - ./Server:/app
       - /app/node_modules
-    depends_on:
-      - mongo
     networks:
       - app-network
+    restart: unless-stopped
 
   frontend:
     build:
@@ -28,18 +27,7 @@ services:
       - backend
     networks:
       - app-network
-
-  mongo:
-    image: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - app-network
-
-volumes:
-  mongo-data:
+    restart: unless-stopped
 
 networks:
   app-network:
