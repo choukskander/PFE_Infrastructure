@@ -1,15 +1,13 @@
-version: '3.8'
-
 services:
   backend:
     build:
-      context: ../Server
+      context: ./Server
     ports:
       - "5000:5000"
     env_file:
-      - ../Server/.env
+      - ./Server/.env
     volumes:
-      - ../Server:/app
+      - ./Server:/app
       - /app/node_modules
     depends_on:
       - mongo
@@ -18,11 +16,11 @@ services:
 
   frontend:
     build:
-      context: ../Client
+      context: ./Client
     ports:
       - "3000:3000"
     volumes:
-      - ../Client:/app
+      - ./Client:/app
       - /app/node_modules
     stdin_open: true
     tty: true
