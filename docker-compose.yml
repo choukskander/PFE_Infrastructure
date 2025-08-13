@@ -74,41 +74,10 @@
 
 # networks:
 #   app-network:
-version: '3.8'
-
 services:
-  backend:
-    image: localhost:8082/pfe-express:latest
-    ports:
-      - "5000:5000"
-    env_file:
-      - ../Server/.env
-    volumes:
-      - ./Server:/app
-      - /app/node_modules
-    depends_on:
-      - mongo
-    networks:
-      - app-network
-    restart: unless-stopped
-
-  frontend:
-    image: localhost:8082/pfe-frontend:latest
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./Client:/app
-      - /app/node_modules
-    stdin_open: true
-    tty: true
-    depends_on:
-      - backend
-    networks:
-      - app-network
-    restart: unless-stopped
-
   mongo:
     image: mongo
+    container_name: mongo
     ports:
       - "27017:27017"
     volumes:
@@ -116,16 +85,48 @@ services:
     networks:
       - app-network
 
+  backend:
+    build: ../Server
+    container_name: backend
+    depends_on:
+      - mongo
+    env_file:
+      - ../Server/.env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../Server:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend:
+    build: ../Client
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../Client:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
     ports:
       - "9091:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - app-network
     restart: unless-stopped
@@ -133,20 +134,21 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    depends_on:
+      - prometheus
     ports:
       - "3001:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
     networks:
       - app-network
     restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   mongo-data:
   prometheus_data:
   grafana_data:
-
-networks:
-  app-network:
