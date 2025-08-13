@@ -82,7 +82,7 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - ./Server/.env
+      - ../Server/.env
     volumes:
       - ./Server:/app
       - /app/node_modules
