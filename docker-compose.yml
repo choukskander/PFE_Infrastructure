@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   backend:
-    image: localhost:8082/pfe-express:latest
+    build:
+      context: ./Server
     ports:
       - "5000:5000"
     env_file:
@@ -10,11 +11,15 @@ services:
     volumes:
       - ./Server:/app
       - /app/node_modules
+    depends_on:
+      - mongo
     networks:
       - app-network
+    restart: unless-stopped
 
   frontend:
-    image: localhost:8082/pfe-frontend:latest
+    build:
+      context: ./Client
     ports:
       - "3000:3000"
     volumes:
@@ -26,6 +31,7 @@ services:
       - backend
     networks:
       - app-network
+    restart: unless-stopped
 
   mongo:
     image: mongo
