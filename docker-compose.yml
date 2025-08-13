@@ -2,27 +2,23 @@ version: '3.8'
 
 services:
   backend:
-    build:
-      context: ../Server
+    image: localhost:8082/pfe-express:latest
     ports:
       - "5000:5000"
     env_file:
-      - ../Server/.env
+      - ./Server/.env
     volumes:
-      - ../Server:/app
+      - ./Server:/app
       - /app/node_modules
-    depends_on:
-      - mongo
     networks:
       - app-network
 
   frontend:
-    build:
-      context: ../Client
+    image: localhost:8082/pfe-frontend:latest
     ports:
       - "3000:3000"
     volumes:
-      - ../Client:/app
+      - ./Client:/app
       - /app/node_modules
     stdin_open: true
     tty: true
@@ -40,8 +36,35 @@ services:
     networks:
       - app-network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+
 volumes:
   mongo-data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   app-network:
