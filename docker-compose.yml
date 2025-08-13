@@ -74,6 +74,8 @@
 
 # networks:
 #   app-network:
+version: "3.8"
+
 services:
   mongo:
     image: mongo
@@ -86,7 +88,7 @@ services:
       - app-network
 
   backend:
-    build: ../Server
+    build: ./Server
     container_name: backend
     depends_on:
       - mongo
@@ -95,21 +97,21 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ../Server:/app
+      - ./Server:/app
       - /app/node_modules
     networks:
       - app-network
     restart: unless-stopped
 
   frontend:
-    build: ../Client
+    build: ./Client
     container_name: frontend
     depends_on:
       - backend
     ports:
       - "3000:3000"
     volumes:
-      - ../Client:/app
+      - ./Client:/app
       - /app/node_modules
     networks:
       - app-network
@@ -125,7 +127,7 @@ services:
     ports:
       - "9091:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     networks:
       - app-network
