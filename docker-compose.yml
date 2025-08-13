@@ -91,7 +91,7 @@ services:
     depends_on:
       - mongo
     env_file:
-      - ../Server/.env
+      - ./Server/.env
     ports:
       - "5000:5000"
     volumes:
