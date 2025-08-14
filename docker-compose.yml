@@ -120,19 +120,24 @@ services:
     tty: true
     restart: unless-stopped
 
+  # === SECTION PROMETHEUS CORRIGÉE ===
   prometheus:
-    image: prom/prometheus:latest
     container_name: prometheus
+    # On dit à Docker de construire une image en utilisant notre Dockerfile
+    build:
+      context: .
+      dockerfile: prometheus.dockerfile
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     ports:
       - "9091:9090"
+    # On ne garde que le volume pour les données, plus de montage de fichier de config !
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     networks:
       - app-network
     restart: unless-stopped
+  # ==================================
 
   grafana:
     image: grafana/grafana:latest

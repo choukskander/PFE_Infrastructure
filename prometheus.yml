@@ -6,6 +6,7 @@ scrape_configs:
     static_configs:
       - targets: ['prometheus:9090']
 
+  # Cible le backend en utilisant son nom de service Docker
   - job_name: 'backend'
     static_configs:
       - targets: ['backend:5000']
