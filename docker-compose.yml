@@ -86,6 +86,7 @@ services:
       - mongo-data:/data/db
     networks:
       - app-network
+    restart: unless-stopped
 
   backend:
     build: ./Server
@@ -127,6 +128,7 @@ services:
     ports:
       - "9091:9090"
     volumes:
+      # Montre bien que c'est un fichier, pas un dossier
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     networks:
