@@ -77,53 +77,37 @@
 version: "3.8"
 
 services:
-  mongo:
-    image: mongo:latest
-    container_name: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - app-network
-    restart: unless-stopped
+  # Le service 'mongo' a été supprimé car vous utilisez MongoDB Atlas.
 
   backend:
     build: ../Server
     container_name: backend
-    depends_on:
-      - mongo
-    env_file:
-      - ../Server/.env
+    restart: unless-stopped
+    # On passe la variable d'environnement directement. Docker-compose la lira depuis un fichier .env
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
     ports:
       - "5000:5000"
-    volumes:
-      - ../Server:/app
-      - /app/node_modules
     networks:
       - app-network
-    restart: unless-stopped
+    # Les volumes de montage de code source ne sont pas nécessaires car l'image contient déjà le code.
 
   frontend:
     build: ../Client
     container_name: frontend
+    restart: unless-stopped
     depends_on:
       - backend
     ports:
       - "3000:3000"
-    volumes:
-      - ../Client:/app
-      - /app/node_modules
     networks:
       - app-network
     stdin_open: true
     tty: true
-    restart: unless-stopped
 
-  # === SECTION PROMETHEUS CORRIGÉE ===
   prometheus:
     container_name: prometheus
-    # On dit à Docker de construire une image en utilisant notre Dockerfile
+    restart: unless-stopped
     build:
       context: .
       dockerfile: prometheus.dockerfile
@@ -131,17 +115,15 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
     ports:
       - "9091:9090"
-    # On ne garde que le volume pour les données, plus de montage de fichier de config !
     volumes:
       - prometheus_data:/prometheus
     networks:
       - app-network
-    restart: unless-stopped
-  # ==================================
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    restart: unless-stopped
     depends_on:
       - prometheus
     ports:
@@ -150,14 +132,12 @@ services:
       - grafana_data:/var/lib/grafana
     networks:
       - app-network
-    restart: unless-stopped
 
 networks:
   app-network:
     driver: bridge
 
 volumes:
-  mongo-data:
   prometheus_data:
   grafana_data:
-
+  # Le volume mongo-data n'est plus nécessaire.
